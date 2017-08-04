@@ -1,0 +1,86 @@
+shadowsocks
+一.简介
+shadowsocks是一个著名的轻量级socket代理，基于python编写。
+官方：https://shadowsocks.org
+Git地址：https://github.com/ziggear/shadowsocks
+说明：
+A fast tunnel proxy that helps you bypass firewalls.
+Features:
+  ● TCP & UDP support
+  ● User management API
+  ● TCP Fast Open
+  ● Workers and graceful restart
+  ● Destination IP blacklist
+二．安装
+国内服务器访问pip官方速度较慢，所以在这我修改使用国内的镜像源
+1，搜索到cmdoptions.py文件并修改成以下内容：
+# locate cmdoptions.py
+#vim /usr/lib/python2.6/site-packages/pip-8.1.2-py2.6.egg/pip/cmdoptions.py
+index_url = partial(
+    Option,
+    '-i', '--index-url', '--pypi-url',
+    dest='index_url',
+    metavar='URL',
+    #default=PyPI.simple_url,
+    default='http://pypi.douban.com/simple/', 把上面注释，添加下面的这段
+    help='Base URL of Python Package Index (default %default).')
+def trusted_host():
+    return Option(
+        "--trusted-host",
+        dest="trusted_hosts",
+        action="append",
+        metavar="HOSTNAME",
+        # default=[],
+        default=['pypi.douban.com'],
+        help="Mark this host as trusted, even though it does not have valid "
+             "or any HTTPS.",
+    )
+2，测试安装，使用的douban的源
+# pip install django==1.9
+Collecting django==1.9
+  Downloading http://pypi.doubanio.com/packages/ea/9b/b5a6360b3dfcd88d4bad70f59da26cbde4bdec395a31bb26dc840e806a50/Django-1.9-py2.py3-none-any.whl (6.6MB)
+    65% |█████████████████████▏          | 4.3MB 1.4MB/s eta 0:00:
+3，Server端安装
+Debian / Ubuntu:
+#apt-get install python-pip
+#pip install shadowsocks
+CentOS:
+#yum install python-setuptools  -y && easy_install pip  
+#pip install shadowsocks
+Windows:
+See Install Server on Windows
+手动安装：
+# git  clone https://github.com/ziggear/shadowsocks.git
+# python  setup.py  install   （手动安装的服务启动名称叫sserver）
+三．使用方法
+# ssserver  -h
+-p ss服务器的端口号
+-k 密码
+-m 加密方式，一般用rc4-md5，table和rc4不要用
+--workers 子进程个数
+--pid-file 记录pid的文件
+--log-file 记录日志
+--user 执行用户的权限，一般使用nobody
+-v 表示输出详细信息
+-d 使用守护进程模式运行
+Online help: https://github.com/shadowsocks/shadowsocks
+四．服务器启动与配置
+#setenforce 0
+直接运行：（默认的密码协议是aes-256-cfb ）
+#ssserver -p 8888 -k password -m aes-256-cfb
+后台运行：(可运行多条，表示启用多个端口和密码给不同用户分配)
+#ssserver -p 666 -k passwd -m rc4-md5 --workers 10 --pid-file /tmp/ss.pid --log-file /tmp/ss.log --user nobody -v -d start
+添加到系统自动：（如果需要开启自动启动同样需要把所加的端口一一添加到rc.local的文件中）
+#echo ' ssserver -p 666 -k passwd -m rc4-md5 --workers 10 --pid-file /tmp/ss.pid --log-file /tmp/ss.log --user nobody -v -d start ' >> /etc/rc.local
+停止服务：
+#kill ssserver
+# kill -9 `ps -ef | grep ssserver | awk '{print $2}'`
+日志查看：
+# tail -f  /var/log/shadowsocks.log
+五，客户端使用
+客户端下载：
+https://github.com/shadowsocks/shadowsocks-windows/releases/download/3.3.5/Shadowsocks-3.3.5.zip
+服务器地址：服务器ip地址
+端口：8881 （ss是靠端口来区别的，类似帐号名称）
+密码：passwd （之前设置的密码）
+加密方式：rc4-md5 （支持多种加密方式）
